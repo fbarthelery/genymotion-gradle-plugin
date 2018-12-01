@@ -80,7 +80,7 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
         GMTool.metaClass.static.newInstance = { gmtool }
 
         String taskName = "dummy"
-        project.task(taskName) << {}
+        project.task(taskName)
 
         project.genymotion.config.taskLaunch = taskName
         project.evaluate()
@@ -101,7 +101,7 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
         def tasks = []
         3.times {
             String taskName = "dummy$it"
-            project.task(taskName) << {}
+            project.task(taskName)
             tasks.add(taskName)
         }
 
