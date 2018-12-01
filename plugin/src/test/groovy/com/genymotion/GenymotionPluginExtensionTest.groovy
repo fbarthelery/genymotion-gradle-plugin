@@ -151,7 +151,7 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
 
         project.android.testVariants.all { variant ->
 
-            Task connectedTask = variant.variantData.connectedTestTask
+            Task connectedTask = variant.connectedInstrumentTest
             Task launchTask = project.tasks.findByName(AndroidPluginTools.getFlavorLaunchTask(connectedTask.name))
             Task finishTask = project.tasks.findByName(AndroidPluginTools.getFlavorFinishTask(connectedTask.name))
 
