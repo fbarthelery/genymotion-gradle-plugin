@@ -216,11 +216,6 @@ class GenymotionPluginExtension {
         String launchName = getLaunchTaskName(theTask.name)
         String finishName = getFinishTaskName(theTask.name)
 
-        if (flavor?.trim()) {
-            launchName = AndroidPluginTools.getFlavorLaunchTask(theTask.name)
-            finishName = AndroidPluginTools.getFlavorFinishTask(theTask.name)
-        }
-
         Task launchTask = project.tasks.create(launchName, GenymotionLaunchTask)
         launchTask.flavor = flavor
         theTask.dependsOn(launchTask)
