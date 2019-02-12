@@ -227,7 +227,8 @@ class GenymotionPluginExtension {
 
         Task finishTask = project.tasks.create(finishName, GenymotionFinishTask)
         finishTask.flavor = flavor
-        theTask.finalizedBy(finishTask)
+        launchTask.finalizedBy(finishTask)
+        finishTask.mustRunAfter(theTask)
     }
 
     public static String getFinishTaskName(String taskName) {

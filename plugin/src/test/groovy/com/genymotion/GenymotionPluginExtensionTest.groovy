@@ -86,10 +86,11 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
         project.evaluate()
 
         def task = project.tasks.getByName(taskName)
+        def launchTask = project.tasks.getByName(GenymotionPluginExtension.getLaunchTaskName(taskName))
         def finishTask = project.tasks.getByName(GenymotionPluginExtension.getFinishTaskName(taskName))
 
         assert task.getTaskDependencies().getDependencies()*.name.contains(GenymotionPluginExtension.getLaunchTaskName(taskName))
-        assert task.finalizedBy.getDependencies().contains(finishTask)
+        assert launchTask.finalizedBy.getDependencies().contains(finishTask)
     }
 
     @Test
@@ -110,10 +111,11 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
 
         tasks.each {
             def task = project.tasks.getByName(it)
+            def launchTask = project.tasks.getByName(GenymotionPluginExtension.getLaunchTaskName(it))
             def finishTask = project.tasks.getByName(GenymotionPluginExtension.getFinishTaskName(it))
 
             assert task.getTaskDependencies().getDependencies()*.name.contains(GenymotionPluginExtension.getLaunchTaskName(it))
-            assert task.finalizedBy.getDependencies().contains(finishTask)
+            assert launchTask.finalizedBy.getDependencies().contains(finishTask)
         }
 
     }
@@ -131,10 +133,11 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
         String taskName = AndroidPluginTestTools.getDefaultTestTask(version)
 
         def task = project.tasks.getByName(taskName)
+        def launchTask = project.tasks.getByName(GenymotionPluginExtension.getLaunchTaskName(taskName))
         def finishTask = project.tasks.getByName(GenymotionPluginExtension.getFinishTaskName(taskName))
 
         assert task.getTaskDependencies().getDependencies()*.name.contains(GenymotionPluginExtension.getLaunchTaskName(taskName))
-        assert task.finalizedBy.getDependencies().contains(finishTask)
+        assert launchTask.finalizedBy.getDependencies().contains(finishTask)
     }
 
     @Test
@@ -156,7 +159,7 @@ class GenymotionPluginExtensionTest extends CleanMetaTest {
             Task finishTask = project.tasks.findByName(AndroidPluginTools.getFlavorFinishTask(connectedTask.name))
 
             assert connectedTask.getTaskDependencies().getDependencies().contains(launchTask)
-            assert connectedTask.finalizedBy.getDependencies().contains(finishTask)
+            assert launchTask.finalizedBy.getDependencies().contains(finishTask)
         }
     }
 
