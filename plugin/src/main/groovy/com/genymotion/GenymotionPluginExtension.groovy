@@ -194,11 +194,16 @@ class GenymotionPluginExtension {
     }
 
     private void injectAndroidTasks() {
-
+        def latestFinishTask = null
         project.android.testVariants.all { variant ->
             String flavorName = variant.productFlavors[0]?.name
             Task connectedTask = variant.connectedInstrumentTest
             injectTasksInto(connectedTask, flavorName)
+            if (latestFinishTask != null) {
+                def launchTask = project.tasks.getByName(getLaunchTaskName(connectedTask.name))
+                launchTask.mustRunAfter(latestFinishTask)
+            }
+            latestFinishTask = getFinishTaskName(connectedTask.name)
         }
 
     }
@@ -216,18 +221,14 @@ class GenymotionPluginExtension {
         String launchName = getLaunchTaskName(theTask.name)
         String finishName = getFinishTaskName(theTask.name)
 
-        if (flavor?.trim()) {
-            launchName = AndroidPluginTools.getFlavorLaunchTask(theTask.name)
-            finishName = AndroidPluginTools.getFlavorFinishTask(theTask.name)
-        }
-
         Task launchTask = project.tasks.create(launchName, GenymotionLaunchTask)
         launchTask.flavor = flavor
         theTask.dependsOn(launchTask)
 
         Task finishTask = project.tasks.create(finishName, GenymotionFinishTask)
         finishTask.flavor = flavor
-        theTask.finalizedBy(finishTask)
+        launchTask.finalizedBy(finishTask)
+        finishTask.mustRunAfter(theTask)
     }
 
     public static String getFinishTaskName(String taskName) {
