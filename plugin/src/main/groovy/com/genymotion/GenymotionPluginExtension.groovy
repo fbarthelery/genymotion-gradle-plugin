@@ -194,11 +194,16 @@ class GenymotionPluginExtension {
     }
 
     private void injectAndroidTasks() {
-
+        def latestFinishTask = null
         project.android.testVariants.all { variant ->
             String flavorName = variant.productFlavors[0]?.name
             Task connectedTask = variant.variantData.connectedTestTask
             injectTasksInto(connectedTask, flavorName)
+            if (latestFinishTask != null) {
+                def launchTask = project.tasks.getByName(getLaunchTaskName(connectedTask.name))
+                launchTask.mustRunAfter(latestFinishTask)
+            }
+            latestFinishTask = getFinishTaskName(connectedTask.name)
         }
 
     }
