@@ -33,6 +33,7 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
+import org.gradle.api.tasks.TaskProvider
 
 /**
  * Holds all the properties defined in a `genymotion` entry defined in a Gradle file
@@ -197,23 +198,23 @@ class GenymotionPluginExtension {
         def latestFinishTask = null
         project.android.testVariants.all { variant ->
             String flavorName = variant.productFlavors[0]?.name
-            Task connectedTask = variant.connectedInstrumentTest
+            TaskProvider<Task> connectedTask = variant.connectedInstrumentTestProvider
             injectTasksInto(connectedTask, flavorName)
             if (latestFinishTask != null) {
-                def launchTask = project.tasks.getByName(getLaunchTaskName(connectedTask.name))
-                launchTask.mustRunAfter(latestFinishTask)
+                project.tasks.named(getLaunchTaskName(connectedTask.name)) {
+                    it.mustRunAfter(latestFinishTask)
+                }
             }
             latestFinishTask = getFinishTaskName(connectedTask.name)
         }
-
     }
 
     public void injectTasksInto(String taskName, String flavor = null) throws UnknownTaskException {
-        def theTask = project.tasks.getByName(taskName)
+        def theTask = project.tasks.named(taskName)
         injectTasksInto(theTask, flavor)
     }
 
-    public void injectTasksInto(Task theTask, String flavor = null) throws UnknownTaskException {
+    public void injectTasksInto(TaskProvider<Task> theTask, String flavor = null) throws UnknownTaskException {
         if (project.genymotion.config.verbose) {
             Log.info("Adding genymotion dependency to " + theTask.name)
         }
@@ -221,14 +222,23 @@ class GenymotionPluginExtension {
         String launchName = getLaunchTaskName(theTask.name)
         String finishName = getFinishTaskName(theTask.name)
 
-        Task launchTask = project.tasks.create(launchName, GenymotionLaunchTask)
-        launchTask.flavor = flavor
-        theTask.dependsOn(launchTask)
+        TaskProvider<GenymotionFinishTask> finishTask = project.tasks.register(finishName, GenymotionFinishTask) {
+            it.flavor = flavor
+            it.mustRunAfter(theTask)
+        }
 
-        Task finishTask = project.tasks.create(finishName, GenymotionFinishTask)
-        finishTask.flavor = flavor
-        launchTask.finalizedBy(finishTask)
-        finishTask.mustRunAfter(theTask)
+        TaskProvider<Task> launchTask = project.tasks.register(launchName, GenymotionLaunchTask) {
+            it.flavor = flavor
+            // bug cause a circular dependency
+            //  it.finalizedBy(finishTask)
+        }
+
+        theTask.configure {
+            it.dependsOn(launchTask)
+        }
+
+        // due to previous bug we need to create this task
+        launchTask.get().finalizedBy(finishTask)
     }
 
     public static String getFinishTaskName(String taskName) {

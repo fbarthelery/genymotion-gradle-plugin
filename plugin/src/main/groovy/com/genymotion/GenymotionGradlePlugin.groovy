@@ -63,11 +63,11 @@ class GenymotionGradlePlugin implements Plugin<Project> {
         //we set the default config for GMTool instances
         GMTool.DEFAULT_CONFIG = project.genymotion.config
 
-        project.task(TASK_LAUNCH, type: GenymotionLaunchTask) {
+        project.tasks.register(TASK_LAUNCH, GenymotionLaunchTask) {
             description 'Starting task for Genymotion plugin'
             group PLUGIN_GROUP
         }
-        project.task(TASK_FINISH, type: GenymotionFinishTask) {
+        project.tasks.register(TASK_FINISH, GenymotionFinishTask) {
             description 'Finishing task for Genymotion plugin'
             group PLUGIN_GROUP
         }
